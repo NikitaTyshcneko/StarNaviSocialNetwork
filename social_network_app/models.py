@@ -12,6 +12,10 @@ class Post(models.Model):
     create_at = models.DateTimeField(auto_now_add=True, null=False)
     like = GenericRelation('Like')
 
+    @property
+    def get_author(self):
+        return self.author.username
+
     def __str__(self):
         return self.title
 
