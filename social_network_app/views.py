@@ -1,15 +1,19 @@
 from django.contrib.auth.models import User
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+from social_network_app.api.filter import LikeAnalyticsFilter
 from social_network_app.api.mixins import LikeModelMixin
-from social_network_app.api.serializer import PostSerializer, UserActivitySerializer
-from social_network_app.models import Post, UserProfile
+from social_network_app.api.serializer import PostSerializer, UserActivitySerializer, LikeAnalyticsSerializer
+from social_network_app.models import Post, UserProfile, Like
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.db.models import Count
+from django.db.models.functions import TruncDate
 
 
 def register_request(request):
@@ -68,3 +72,21 @@ class UserActivityViewSet(ReadOnlyModelViewSet):
         user_profile = UserProfile.objects.get_or_create(user=self.request.user)[0]
         serializer = UserActivitySerializer(user_profile)
         return Response(serializer.data)
+
+
+class LikeAnalyticsViewSet(ReadOnlyModelViewSet):
+    permission_classes = [IsAuthenticated]
+    queryset = Like.objects.all()
+    serializer_class = LikeAnalyticsSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = LikeAnalyticsFilter
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset = queryset.filter(
+            created_at__date__gte=self.request.query_params.get('date_from'),
+            created_at__date__lte=self.request.query_params.get('date_to')
+        )
+        queryset = queryset.annotate(date=TruncDate('created_at')).values('date')
+        queryset = queryset.annotate(like_count=Count('id')).order_by('date')
+        return queryset

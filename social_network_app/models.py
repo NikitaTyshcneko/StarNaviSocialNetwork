@@ -11,7 +11,7 @@ class Post(models.Model):
     title = models.CharField(max_length=100)
     body = models.TextField()
     create_at = models.DateTimeField(auto_now_add=True, null=False)
-    like = GenericRelation('Like')
+    like = GenericRelation('Like', related_query_name='likes')
 
     @property
     def get_author(self):
@@ -32,6 +32,10 @@ class Like(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
+
+    @property
+    def like_count(self):
+        return self.content_object.likes.count()
 
     class Meta:
         constraints = [

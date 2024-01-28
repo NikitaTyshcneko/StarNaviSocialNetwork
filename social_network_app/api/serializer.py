@@ -10,10 +10,13 @@ class PostSerializer(serializers.ModelSerializer):
         fields = ['id', 'author', 'title', 'body', 'create_at', 'like_count']
 
 
-class LikeSerializer(serializers.ModelSerializer):
+class LikeAnalyticsSerializer(serializers.Serializer):
+    date = serializers.DateField()
+    like_count = serializers.IntegerField()
+
     class Meta:
         model = Like
-        fields = '__all__'
+        fields = ['date', 'like_count']
 
 
 class UserActivitySerializer(serializers.ModelSerializer):
