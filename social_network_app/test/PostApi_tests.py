@@ -40,7 +40,7 @@ class TestPostModel(TestCase):
     def test_for_check_authorized(self):
         c = APIClient()
         response = c.get(self.url_api_post)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_create_post(self):
         post = Post.objects.create(
@@ -86,7 +86,6 @@ class TestPostModel(TestCase):
         response = view(request, pk=self.post2.pk)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
 
     def test_patch_posts_details(self):
         post4 = {'title': 'Post 2', 'body': 'Body of post 2', 'author': 'test_user'}

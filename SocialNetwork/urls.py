@@ -16,13 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from social_network_app.views import login_request, register_request, logout_request
-import social_network_app
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('login/', login_request),
-    path('register/', register_request),
-    path('logout/', logout_request),
-    path('api/v1/', include('social_network_app.api.urls'))
+    path('api/v1/schema/', SpectacularAPIView.as_view(), name='api-schema'),
+    path('api/v1/docs/', SpectacularSwaggerView.as_view(url_name='api-schema'), name='api-docs'),
+    path('api/v1/', include('social_network_app.api.urls')),
+    path('api/v1/auth/', include('djoser.urls')),
+    path('api/v1/auth/', include('djoser.urls.jwt')),
 ]
